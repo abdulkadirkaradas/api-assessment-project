@@ -30,6 +30,27 @@
 - **Name:** N/A
 - **Middleware:** api
 - **Description:** This API route This API route is used to add a new Order.
+- **Example;**
+```
+# The request body should be like the example below
+{
+    "order": [
+        {
+            "productId": 1,
+            "quantity": 2
+        },
+        {
+            "productId": 2,
+            "quantity": 2
+        },
+        {
+            "productId": 3,
+            "quantity": 5
+        }
+    ],
+    "customerId": 2
+}
+```
 
 ### `api/v1/order/{id}`
 - **Method:** DELETE
