@@ -11,7 +11,7 @@ class StoreOrderValidation
     {
         $validations = [
             "order" => ["required", "array"],
-            "order.*.customerId" => ["required", "max:10", "numeric"],
+            "customerId" => ["required", "max:10", "numeric"],
             "order.*.productId" => ["required", "numeric"],
             "order.*.quantity" => ["required", "numeric"],
         ];
