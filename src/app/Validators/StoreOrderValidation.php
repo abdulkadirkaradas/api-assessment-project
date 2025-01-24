@@ -10,9 +10,10 @@ class StoreOrderValidation
     public static function validate(Request $request)
     {
         $validations = [
-            "customerId" => ["required", "max:10", "numeric"],
-            "productId" => ["required", "numeric"],
-            "quantity" => ["required", "numeric"],
+            "order" => ["required", "array"],
+            "order.*.customerId" => ["required", "max:10", "numeric"],
+            "order.*.productId" => ["required", "numeric"],
+            "order.*.quantity" => ["required", "numeric"],
         ];
 
         $validator = Validator::make($request->all(), $validations);
