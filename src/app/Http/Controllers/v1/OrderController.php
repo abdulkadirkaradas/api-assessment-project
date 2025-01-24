@@ -158,4 +158,25 @@ class OrderController extends Controller
             return CommonFunctions::response(FAIL, ORDER_NOT_FOUND);
         }
     }
+
+    public function list()
+    {
+        return Order::with('orderItems')->get()->map(function ($order) {
+            $items = $order->orderItems->map(function ($item) {
+                return [
+                    'productId' => $item->product_id,
+                    'quantity' => $item->quantity,
+                    'unitPrice' => $item->unit_price,
+                    'total' => $item->total,
+                ];
+            });
+
+            return [
+                'id' => $order->id,
+                'customerId' => $order->customer_id,
+                'items' => $items,
+                'total' => $items->sum('total'),
+            ];
+        });
+    }
 }
