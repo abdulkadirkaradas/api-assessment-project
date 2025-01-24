@@ -5,6 +5,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 Route::prefix('v1')->group(function () {
+    Route::get('/calculate-discount/order/{id}', [OrderController::class, 'calculateDiscount']);
     Route::post('/orders', [OrderController::class, 'store']);
     Route::delete('/order/{id}', [OrderController::class, 'delete']);
 });
