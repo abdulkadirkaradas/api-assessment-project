@@ -44,4 +44,19 @@ class OrderController extends Controller
             return CommonFunctions::response(FAIL, ORDER_CREATION_FAILED);
         }
     }
+
+    public function delete($id)
+    {
+        $order = Order::find($id);
+
+        if ($order) {
+            if ($order->delete()) {
+                return CommonFunctions::response(SUCCESS, ORDER_DELETED);
+            } else {
+                return CommonFunctions::response(FAIL, ORDER_DELETE_FAILED);
+            }
+        } else {
+            return CommonFunctions::response(FAIL, ORDER_NOT_FOUND);
+        }
+    }
 }
