@@ -17,8 +17,7 @@ class OrderController extends Controller
         $validated = CommonFunctions::validateRequest($request, StoreOrderValidation::class);
 
         if (isset($validated['status']) && $validated['status'] === BAD_REQUEST) {
-            CommonFunctions::response(BAD_REQUEST, BAD_REQUEST_MSG);
-            return response()->json($validated);
+            return CommonFunctions::response(BAD_REQUEST, BAD_REQUEST_MSG);
         }
 
         $product = Product::find($validated['productId']);
@@ -37,12 +36,12 @@ class OrderController extends Controller
             $orderItem->product_id = $validated['productId'];
 
             if ($newOrder->orderItems()->save($orderItem)) {
-                CommonFunctions::response(SUCCESS, ORDER_CREATED);
+                return CommonFunctions::response(SUCCESS, ORDER_CREATED);
             } else {
-                CommonFunctions::response(FAIL, ORDER_CREATION_FAILED);
+                return CommonFunctions::response(FAIL, ORDER_CREATION_FAILED);
             }
         } else {
-            CommonFunctions::response(FAIL, ORDER_CREATION_FAILED);
+            return CommonFunctions::response(FAIL, ORDER_CREATION_FAILED);
         }
     }
 }
