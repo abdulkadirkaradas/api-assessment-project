@@ -61,7 +61,10 @@ class OrderController extends Controller
 
             DB::commit();
 
-            return CommonFunctions::response(SUCCESS, ORDER_CREATED);
+            return CommonFunctions::response(SUCCESS, [
+                "message" => ORDER_CREATED,
+                "orderId" => $newOrder->id
+            ]);
 
         } catch (\Exception $e) {
             DB::rollBack();
