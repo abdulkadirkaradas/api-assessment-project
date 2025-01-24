@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('order_items', function (Blueprint $table) {
             $table->id()->primary()->autoIncrement();
             $table->integer('quantity');
-            $table->float('unit_prices');
+            $table->float('unit_price');
             $table->float('total');
             $table->foreignId('order_id');
             $table->foreignId('product_id');
