@@ -9,6 +9,7 @@ use App\Models\OrderItem;
 use App\Models\Product;
 use App\Validators\StoreOrderValidation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class OrderController extends Controller
 {
@@ -20,32 +21,45 @@ class OrderController extends Controller
             return CommonFunctions::response(BAD_REQUEST, BAD_REQUEST_MSG);
         }
 
-        $product = Product::find($validated['productId']);
+        $orders = $validated['order'];
 
-        if ($validated['quantity'] > $product->stock) {
-            return CommonFunctions::response(FAIL, PRODUCT_STOCK_IS_NOT_ENOUGH);
-        }
+        $productIds = array_column($orders, 'productId');
+        $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
 
-        $unitPrice = $validated['quantity'] * $product->price;
+        DB::beginTransaction();
 
-        $newOrder = new Order();
-        $newOrder->customer_id = $validated['customerId'];
-        $newOrder->total = $unitPrice;
+        try {
+            foreach ($orders as $order) {
+                $product = $products->get($order['productId']);
 
-        if ($newOrder->save()) {
-            $orderItem = new OrderItem();
-            $orderItem->quantity = $validated['quantity'];
-            $orderItem->unit_price = $product->price;
-            $orderItem->total = $unitPrice;
-            $orderItem->product_id = $validated['productId'];
+                if (!$product || $order['quantity'] > $product->stock) {
+                    throw new \Exception(PRODUCT_STOCK_IS_NOT_ENOUGH);
+                }
 
-            if ($newOrder->orderItems()->save($orderItem)) {
-                return CommonFunctions::response(SUCCESS, ORDER_CREATED);
-            } else {
-                return CommonFunctions::response(FAIL, ORDER_CREATION_FAILED);
+                $totalPrice = $order['quantity'] * $product->price;
+
+                $newOrder = new Order();
+                $newOrder->customer_id = $order['customerId'];
+                $newOrder->total = $totalPrice;
+                $newOrder->save();
+
+                $orderItem = new OrderItem();
+                $orderItem->quantity = $order['quantity'];
+                $orderItem->unit_price = $product->price;
+                $orderItem->total = $totalPrice;
+                $orderItem->product_id = $order['productId'];
+
+                $newOrder->orderItems()->save($orderItem);
             }
-        } else {
-            return CommonFunctions::response(FAIL, ORDER_CREATION_FAILED);
+
+            DB::commit();
+
+            return CommonFunctions::response(SUCCESS, ORDER_CREATED);
+
+        } catch (\Exception $e) {
+            DB::rollBack();
+
+            return CommonFunctions::response(FAIL, $e->getMessage());
         }
     }
 
