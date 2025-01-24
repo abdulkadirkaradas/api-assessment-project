@@ -1,0 +1,6 @@
+<?php
+
+const BAD_REQUEST_MSG = "The request could not be understood or was missing required parameters.";
+const VALIDATOR_FAILED = "The request could not be understood or was missing required parameters.";
+const ORDER_CREATION_FAILED = "The order could not be created!";
+const ORDER_CREATED = "The order has been created.";
