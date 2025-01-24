@@ -22,6 +22,10 @@ class OrderController extends Controller
 
         $product = Product::find($validated['productId']);
 
+        if ($validated['quantity'] > $product->stock) {
+            return CommonFunctions::response(FAIL, PRODUCT_STOCK_IS_NOT_ENOUGH);
+        }
+
         $unitPrice = $validated['quantity'] * $product->price;
 
         $newOrder = new Order();

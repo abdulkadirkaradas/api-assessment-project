@@ -7,3 +7,4 @@ const ORDER_CREATION_FAILED = "The order could not be created!";
 const ORDER_CREATED = "The order has been created.";
 const ORDER_DELETE_FAILED = "The order could not be deleted!";
 const ORDER_DELETED = "The order has been deleted.";
+const PRODUCT_STOCK_IS_NOT_ENOUGH = "The stock amount of product it is not enough!";
