@@ -22,6 +22,8 @@ class OrderController extends Controller
         }
 
         $orders = $validated['order'];
+        $customerId = $validated['customerId'];
+        $overallPrice = 0;
 
         $productIds = array_column($orders, 'productId');
         $products = Product::whereIn('id', $productIds)->get()->keyBy('id');
@@ -29,6 +31,11 @@ class OrderController extends Controller
         DB::beginTransaction();
 
         try {
+            $newOrder = new Order();
+            $newOrder->customer_id = $customerId;
+            $newOrder->total = $overallPrice;
+            $newOrder->save();
+
             foreach ($orders as $order) {
                 $product = $products->get($order['productId']);
 
@@ -38,11 +45,6 @@ class OrderController extends Controller
 
                 $totalPrice = $order['quantity'] * $product->price;
 
-                $newOrder = new Order();
-                $newOrder->customer_id = $order['customerId'];
-                $newOrder->total = $totalPrice;
-                $newOrder->save();
-
                 $orderItem = new OrderItem();
                 $orderItem->quantity = $order['quantity'];
                 $orderItem->unit_price = $product->price;
@@ -50,7 +52,12 @@ class OrderController extends Controller
                 $orderItem->product_id = $order['productId'];
 
                 $newOrder->orderItems()->save($orderItem);
+
+                $overallPrice += $totalPrice;
             }
+
+            $newOrder->total = $overallPrice;
+            $newOrder->save();
 
             DB::commit();
 
