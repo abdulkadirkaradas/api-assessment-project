@@ -73,6 +73,77 @@ class OrderController extends Controller
         }
     }
 
+    public function calculateDiscount($id)
+    {
+        $order = Order::with(['customer', 'orderItems', 'orderDiscounts'])->find($id);
+
+        if (!$order) {
+            return CommonFunctions::response(FAIL, ORDER_NOT_FOUND);
+        }
+
+        $totalPrice = $order->orderItems->sum('total');
+        $products = Product::whereIn('id', $order->orderItems->pluck('product_id'))
+            ->get()
+            ->keyBy('id');
+
+        $discounts = [];
+
+        $getCategoryItems = function ($categoryId) use ($order, $products) {
+            return $order->orderItems->filter(function ($item) use ($products, $categoryId) {
+                return $products[$item->product_id]->category == $categoryId;
+            });
+        };
+
+        $calculateDiscount = function ($condition, $discountReason, $discountAmount, &$totalPrice) use (&$discounts) {
+            if ($condition) {
+                $discounts[] = [
+                    'discountReason' => $discountReason,
+                    'discountAmount' => floatval($discountAmount),
+                    'subtotal' => $totalPrice - $discountAmount
+                ];
+                $totalPrice -= $discountAmount;
+            }
+        };
+
+        // Category 1 Discount Calculation
+        $category1Items = $getCategoryItems(1);
+        $category1Quantity = $category1Items->sum('quantity');
+        $category1MinPrice = $category1Items->min('unit_price');
+        $calculateDiscount(
+            $category1Quantity >= 2,
+            'BUY_2_OR_MORE_GET_20_PERCENT',
+            $category1MinPrice * 0.20,
+            $totalPrice
+        );
+
+        // Category 2 Discount Calculation
+        $category2Items = $getCategoryItems(2);
+        $category2Quantity = $category2Items->sum('quantity');
+        $category2MinPrice = $category2Items->min('unit_price');
+        $calculateDiscount(
+            $category2Quantity >= 6,
+            'BUY_5_GET_1',
+            $category2MinPrice,
+            $totalPrice
+        );
+
+        // Total Price Discount Calculation
+        $calculateDiscount(
+            $totalPrice > 1000,
+            '10_PERCENT_OVER_1000',
+            $totalPrice * 0.10,
+            $totalPrice
+        );
+
+        return [
+            'orderId' => $order->id,
+            'discounts' => $discounts,
+            'totalDiscount' => array_sum(array_column($discounts, 'discountAmount')),
+            'discountedTotal' => $totalPrice
+        ];
+    }
+
+
     public function delete($id)
     {
         $order = Order::find($id);
