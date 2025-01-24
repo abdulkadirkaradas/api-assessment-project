@@ -19,7 +19,7 @@ class Order extends Model
 
     protected $fillable = [
         'total',
-        'order_items_id'
+        'customer_id'
     ];
 
     public function customer(): BelongsTo
