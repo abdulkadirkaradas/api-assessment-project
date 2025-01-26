@@ -1,3 +1,5 @@
+# This file has been created with the help of the source mentioned below.
+# https://github.com/hanieas/Docker-Laravel/blob/master/php/Dockerfile
 FROM php:8.3-fpm
 
 #Install Composer
@@ -31,7 +33,7 @@ RUN apt-get -y install --fix-missing \
     libonig-dev \
     libxml2-dev
 
-# Install Postgres PDO (adjust for Windows if needed)
+# Install Postgres PDO
 RUN apt-get install -y libpq-dev \
     && docker-php-ext-configure pgsql -with-pgsql=/usr/local/pgsql \
     && docker-php-ext-install pdo pdo_pgsql pgsql
